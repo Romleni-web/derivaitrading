@@ -23,11 +23,6 @@ const userSchema = new mongoose.Schema({
     enum: ['local', 'google'],
     default: 'local'
   },
-  // email duplicate removed below
-    lowercase: true,
-    trim: true,
-    match: [/^[^\s@]+@[^\s@]+\.[^\s@]+$/, 'Please enter a valid email']
-  },
   password: {
     type: String,
     required: function() { return this.authProvider === 'local'; },

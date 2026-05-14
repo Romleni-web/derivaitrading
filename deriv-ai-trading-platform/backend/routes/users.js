@@ -37,22 +37,6 @@ router.put('/risk-settings', auth, [
   }
 });
 
-// Update profile
-router.put('/profile', auth, [
-  body('name').optional().trim().isLength({ min: 2, max: 50 })
-], async (req, res, next) => {
-  try {
-    const user = await User.findByIdAndUpdate(
-      req.user._id,
-      { $set: { name: req.body.name } },
-      { new: true }
-    );
-    res.json({ name: user.name, email: user.email });
-  } catch (err) {
-    next(err);
-  }
-});
-
 // Get performance dashboard data
 router.get('/dashboard', auth, async (req, res, next) => {
   try {
