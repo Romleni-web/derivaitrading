@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Deriv AI Trading Platform</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div id="app">
+  <!-- Login Screen -->
+  <div id="login-screen" class="screen">
+    <div class="auth-card">
+      <div class="logo">
+        <svg width="48" height="48" viewBox="0 0 48 48" fill="none"><rect width="48" height="48" rx="12" fill="#00d4aa"/><path d="M14 24h8v8h-8zM26 16h8v16h-8z" fill="#0a0e1a"/></svg>
+        <h1>Deriv AI</h1>
+        <p>Intelligent Multi-Market Trading</p>
+      </div>
+      <div class="auth-tabs">
+        <button class="auth-tab active" data-tab="login">Login</button>
+        <button class="auth-tab" data-tab="register">Register</button>
+      </div>
+      <form id="login-form" class="auth-form">
+        <input type="email" name="email" placeholder="Email" required>
+        <input type="password" name="password" placeholder="Password" required>
+        <button type="submit" class="btn-primary">Sign In</button>
+        <div class="auth-divider"><span>or</span></div>
+        <a href="/api/auth/google" class="btn-google">
+          <svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.842 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z"/><path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332C2.438 15.983 5.482 18 9 18z"/><path fill="#FBBC05" d="M3.964 10.71c-.18-.54-.282-1.116-.282-1.71s.102-1.17.282-1.71V4.958H.957C.347 6.173 0 7.548 0 9s.348 2.827.957 4.042l3.007-2.332z"/><path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0 5.482 0 2.438 2.017.957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z"/></svg>
+          Sign in with Google
+        </a>
+        <p class="auth-error"></p>
+      </form>
+      <form id="register-form" class="auth-form hidden">
+        <input type="text" name="name" placeholder="Full Name" required minlength="2">
+        <input type="email" name="email" placeholder="Email" required>
+        <input type="password" name="password" placeholder="Password (min 8 chars)" required minlength="8">
+        <button type="submit" class="btn-primary">Create Account</button>
+        <div class="auth-divider"><span>or</span></div>
+        <a href="/api/auth/google" class="btn-google">
+          <svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.842 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z"/><path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332C2.438 15.983 5.482 18 9 18z"/><path fill="#FBBC05" d="M3.964 10.71c-.18-.54-.282-1.116-.282-1.71s.102-1.17.282-1.71V4.958H.957C.347 6.173 0 7.548 0 9s.348 2.827.957 4.042l3.007-2.332z"/><path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0 5.482 0 2.438 2.017.957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z"/></svg>
+          Sign up with Google
+        </a>
+        <p class="auth-error"></p>
+      </form>
+    </div>
+  </div>
+
+  <!-- Main App -->
+  <div id="main-screen" class="screen hidden">
+    <!-- Header -->
+    <header class="app-header">
+      <div class="header-left">
+        <button id="sidebar-toggle" class="icon-btn">☰</button>
+        <div class="logo-small">
+          <svg width="32" height="32" viewBox="0 0 48 48" fill="none"><rect width="48" height="48" rx="12" fill="#00d4aa"/><path d="M14 24h8v8h-8zM26 16h8v16h-8z" fill="#0a0e1a"/></svg>
+          <span>Deriv AI</span>
+        </div>
+      </div>
+      <div class="header-center">
+        <div class="balance-display">
+          <span class="balance-label">Balance</span>
+          <span class="balance-value" id="header-balance">$0.00</span>
+          <span class="balance-currency" id="header-currency">USD</span>
+        </div>
+        <div class="connection-status" id="ws-status">
+          <span class="status-dot"></span>
+          <span class="status-text">Connecting</span>
+        </div>
+      </div>
+      <div class="header-right">
+        <div class="subscription-badge" id="sub-badge">FREE</div>
+        <button id="bot-toggle" class="bot-switch">
+          <span class="switch-label">AI Bot</span>
+          <div class="switch-track"><div class="switch-thumb"></div></div>
+        </button>
+        <div class="user-menu">
+          <button id="user-btn" class="user-avatar"></button>
+          <div class="dropdown hidden" id="user-dropdown">
+            <a href="#" data-page="profile">Profile</a>
+            <a href="#" data-page="settings">Settings</a>
+            <a href="#" data-page="admin" id="admin-link" class="hidden">Admin Panel</a>
+            <hr>
+            <a href="#" id="logout-btn">Logout</a>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <div class="app-body">
+      <!-- Sidebar -->
+      <aside class="sidebar" id="sidebar">
+        <nav class="sidebar-nav">
+          <div class="nav-section">
+            <span class="nav-label">Markets</span>
+            <a href="#" data-contract="rise_fall" class="nav-item active">
+              <span class="nav-icon">↗</span>
+              <span class="nav-text">Rise/Fall</span>
+            </a>
+            <a href="#" data-contract="higher_lower" class="nav-item">
+              <span class="nav-icon">⇅</span>
+              <span class="nav-text">Higher/Lower</span>
+            </a>
+            <a href="#" data-contract="over_under" class="nav-item">
+              <span class="nav-icon">⊘</span>
+              <span class="nav-text">Over/Under</span>
+            </a>
+            <a href="#" data-contract="matches_differs" class="nav-item">
+              <span class="nav-icon">≡</span>
+              <span class="nav-text">Matches/Differs</span>
+            </a>
+            <a href="#" data-contract="even_odd" class="nav-item">
+              <span class="nav-icon">½</span>
+              <span class="nav-text">Even/Odd</span>
+            </a>
+          </div>
+          <div class="nav-section">
+            <span class="nav-label">Digits</span>
+            <a href="#" data-contract="digit_over_under" class="nav-item">
+              <span class="nav-icon">⊘</span>
+              <span class="nav-text">Digit Over/Under</span>
+            </a>
+            <a href="#" data-contract="digit_match" class="nav-item">
+              <span class="nav-icon">✓</span>
+              <span class="nav-text">Digit Match</span>
+            </a>
+            <a href="#" data-contract="digit_differs" class="nav-item">
+              <span class="nav-icon">✗</span>
+              <span class="nav-text">Digit Differs</span>
+            </a>
+          </div>
+          <div class="nav-section">
+            <span class="nav-label">Advanced</span>
+            <a href="#" data-contract="multipliers" class="nav-item">
+              <span class="nav-icon">✕</span>
+              <span class="nav-text">Multipliers</span>
+            </a>
+            <a href="#" data-contract="accumulators" class="nav-item">
+              <span class="nav-icon">∑</span>
+              <span class="nav-text">Accumulators</span>
+            </a>
+            <a href="#" data-contract="vanilla_call" class="nav-item">
+              <span class="nav-icon">C</span>
+              <span class="nav-text">Vanilla Call</span>
+            </a>
+            <a href="#" data-contract="vanilla_put" class="nav-item">
+              <span class="nav-icon">P</span>
+              <span class="nav-text">Vanilla Put</span>
+            </a>
+          </div>
+          <div class="nav-section">
+            <span class="nav-label">Synthetic</span>
+            <a href="#" data-contract="synthetic_10" class="nav-item">
+              <span class="nav-icon">10</span>
+              <span class="nav-text">Vol 10</span>
+            </a>
+            <a href="#" data-contract="synthetic_25" class="nav-item">
+              <span class="nav-icon">25</span>
+              <span class="nav-text">Vol 25</span>
+            </a>
+            <a href="#" data-contract="synthetic_50" class="nav-item">
+              <span class="nav-icon">50</span>
+              <span class="nav-text">Vol 50</span>
+            </a>
+            <a href="#" data-contract="synthetic_75" class="nav-item">
+              <span class="nav-icon">75</span>
+              <span class="nav-text">Vol 75</span>
+            </a>
+            <a href="#" data-contract="synthetic_100" class="nav-item">
+              <span class="nav-icon">100</span>
+              <span class="nav-text">Vol 100</span>
+            </a>
+          </div>
+          <div class="nav-section">
+            <span class="nav-label">Indices</span>
+            <a href="#" data-contract="boom_1000" class="nav-item">
+              <span class="nav-icon">🚀</span>
+              <span class="nav-text">Boom 1000</span>
+            </a>
+            <a href="#" data-contract="crash_1000" class="nav-item">
+              <span class="nav-icon">💥</span>
+              <span class="nav-text">Crash 1000</span>
+            </a>
+            <a href="#" data-contract="step_index" class="nav-item">
+              <span class="nav-icon">📶</span>
+              <span class="nav-text">Step Index</span>
+            </a>
+            <a href="#" data-contract="derived_index" class="nav-item">
+              <span class="nav-icon">📊</span>
+              <span class="nav-text">Derived Index</span>
+            </a>
+          </div>
+        </nav>
+      </aside>
+
+      <!-- Main Content -->
+      <main class="main-content">
+        <!-- Dashboard View -->
+        <div id="dashboard-view" class="view">
+          <div class="dashboard-grid">
+            <!-- Live Chart -->
+            <div class="card chart-card">
+              <div class="card-header">
+                <h3 id="chart-title">R_100</h3>
+                <div class="tick-info">
+                  <span class="tick-value" id="live-tick">--</span>
+                  <span class="tick-change" id="tick-change">--</span>
+                </div>
+              </div>
+              <canvas id="tick-chart" width="800" height="300"></canvas>
+              <div class="chart-controls">
+                <button data-symbol="R_10" class="symbol-btn">R_10</button>
+                <button data-symbol="R_25" class="symbol-btn">R_25</button>
+                <button data-symbol="R_50" class="symbol-btn">R_50</button>
+                <button data-symbol="R_75" class="symbol-btn">R_75</button>
+                <button data-symbol="R_100" class="symbol-btn active">R_100</button>
+                <button data-symbol="1HZ100V" class="symbol-btn">1HZ100V</button>
+                <button data-symbol="BOOM1000" class="symbol-btn">BOOM1000</button>
+                <button data-symbol="CRASH1000" class="symbol-btn">CRASH1000</button>
+                <button data-symbol="frxEURUSD" class="symbol-btn">EUR/USD</button>
+              </div>
+            </div>
+
+            <!-- AI Analysis Panel -->
+            <div class="card ai-card">
+              <div class="card-header">
+                <h3>AI Analysis</h3>
+                <span class="ai-status" id="ai-status">Analyzing...</span>
+              </div>
+              <div class="ai-confidence">
+                <div class="confidence-ring">
+                  <svg viewBox="0 0 100 100">
+                    <circle cx="50" cy="50" r="45" fill="none" stroke="#1a2332" stroke-width="8"/>
+                    <circle id="confidence-circle" cx="50" cy="50" r="45" fill="none" stroke="#00d4aa" stroke-width="8" stroke-dasharray="283" stroke-dashoffset="283" stroke-linecap="round"/>
+                  </svg>
+                  <div class="confidence-value" id="confidence-value">0%</div>
+                </div>
+                <div class="ai-decision" id="ai-decision">WAIT</div>
+              </div>
+              <div class="ai-details">
+                <div class="detail-row">
+                  <span>Probability</span>
+                  <span id="ai-probability">--</span>
+                </div>
+                <div class="detail-row">
+                  <span>Trend</span>
+                  <span id="ai-trend">--</span>
+                </div>
+                <div class="detail-row">
+                  <span>Volatility</span>
+                  <span id="ai-volatility">--</span>
+                </div>
+                <div class="detail-row">
+                  <span>Pattern</span>
+                  <span id="ai-pattern">--</span>
+                </div>
+                <div class="detail-row full">
+                  <span>Reason</span>
+                  <p id="ai-reason">--</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Trade Panel -->
+            <div class="card trade-card">
+              <div class="card-header">
+                <h3>Trade</h3>
+                <div class="mode-toggle">
+                  <button class="mode-btn active" data-mode="manual">Manual</button>
+                  <button class="mode-btn" data-mode="ai">AI Mode</button>
+                </div>
+              </div>
+              <div id="trade-form-container">
+                <!-- Dynamic form injected here -->
+              </div>
+            </div>
+
+            <!-- Open Trades -->
+            <div class="card trades-card">
+              <div class="card-header">
+                <h3>Open Trades</h3>
+                <span class="badge" id="open-count">0</span>
+              </div>
+              <div class="trades-table-container">
+                <table class="trades-table" id="open-trades-table">
+                  <thead>
+                    <tr><th>Symbol</th><th>Type</th><th>Amount</th><th>Dir</th><th>Status</th><th>AI</th><th>Action</th></tr>
+                  </thead>
+                  <tbody></tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- Trade History -->
+            <div class="card history-card">
+              <div class="card-header">
+                <h3>History</h3>
+                <div class="history-filters">
+                  <select id="history-filter">
+                    <option value="all">All</option>
+                    <option value="won">Won</option>
+                    <option value="lost">Lost</option>
+                  </select>
+                </div>
+              </div>
+              <div class="trades-table-container">
+                <table class="trades-table" id="history-table">
+                  <thead>
+                    <tr><th>Time</th><th>Symbol</th><th>Type</th><th>Amount</th><th>Result</th><th>P/L</th></tr>
+                  </thead>
+                  <tbody></tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- Performance -->
+            <div class="card perf-card">
+              <div class="card-header"><h3>Performance</h3></div>
+              <div class="perf-stats">
+                <div class="stat-box">
+                  <span class="stat-label">Win Rate</span>
+                  <span class="stat-value" id="win-rate">0%</span>
+                </div>
+                <div class="stat-box">
+                  <span class="stat-label">Total P/L</span>
+                  <span class="stat-value" id="total-pnl">$0</span>
+                </div>
+                <div class="stat-box">
+                  <span class="stat-label">AI Accuracy</span>
+                  <span class="stat-value" id="ai-accuracy">0%</span>
+                </div>
+                <div class="stat-box">
+                  <span class="stat-label">Total Trades</span>
+                  <span class="stat-value" id="total-trades">0</span>
+                </div>
+              </div>
+              <canvas id="pnl-chart" width="400" height="150"></canvas>
+            </div>
+
+            <!-- Risk Settings -->
+            <div class="card risk-card">
+              <div class="card-header"><h3>Risk Management</h3></div>
+              <div class="risk-form">
+                <div class="form-row">
+                  <label>Max Trade Amount</label>
+                  <input type="number" id="risk-max-amount" step="0.01" min="0.35">
+                </div>
+                <div class="form-row">
+                  <label>Daily Loss Limit</label>
+                  <input type="number" id="risk-daily-loss" step="0.01">
+                </div>
+                <div class="form-row">
+                  <label>Max Open Trades</label>
+                  <input type="number" id="risk-max-open" min="1" max="50">
+                </div>
+                <div class="form-row">
+                  <label>Stop Loss %</label>
+                  <input type="number" id="risk-sl" step="0.1" min="0.1">
+                </div>
+                <div class="form-row">
+                  <label>Take Profit %</label>
+                  <input type="number" id="risk-tp" step="0.1" min="0.1">
+                </div>
+                <button id="save-risk" class="btn-secondary">Save Settings</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Admin View -->
+        <div id="admin-view" class="view hidden">
+          <div class="admin-header">
+            <h2>Admin Panel</h2>
+            <div class="admin-tabs">
+              <button class="admin-tab active" data-tab="users">Users</button>
+              <button class="admin-tab" data-tab="stats">Statistics</button>
+              <button class="admin-tab" data-tab="ai">AI Performance</button>
+            </div>
+          </div>
+          <div id="admin-users" class="admin-section">
+            <div class="search-bar">
+              <input type="text" id="admin-search" placeholder="Search users...">
+              <button id="admin-search-btn">Search</button>
+            </div>
+            <table class="admin-table" id="admin-users-table">
+              <thead>
+                <tr><th>Name</th><th>Email</th><th>Plan</th><th>Trades</th><th>Status</th><th>Actions</th></tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+          <div id="admin-stats" class="admin-section hidden">
+            <div class="stats-grid" id="platform-stats"></div>
+          </div>
+          <div id="admin-ai" class="admin-section hidden">
+            <div id="ai-performance-charts"></div>
+          </div>
+        </div>
+      </main>
+    </div>
+          <!-- Settings Modal -->
+        <div id="settings-modal" class="modal hidden">
+          <div class="modal-overlay"></div>
+          <div class="modal-content">
+            <div class="modal-header">
+              <h3>Settings</h3>
+              <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+              <div class="settings-tabs">
+                <button class="settings-tab active" data-tab="deriv">Deriv Account</button>
+                <button class="settings-tab" data-tab="profile">Profile</button>
+                <button class="settings-tab" data-tab="security">Security</button>
+              </div>
+
+              <div id="settings-deriv" class="settings-section">
+                <div class="deriv-status-card" id="deriv-status-card">
+                  <div class="deriv-status-icon" id="deriv-status-icon">🔗</div>
+                  <div class="deriv-status-info">
+                    <h4 id="deriv-status-title">Not Connected</h4>
+                    <p id="deriv-status-desc">Connect your Deriv API token to enable live trading</p>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label>Deriv API Token <span class="help-icon" title="Get this from Deriv.com > Account Settings > API Token">?</span></label>
+                  <div class="token-input-wrap">
+                    <input type="password" id="deriv-token-input" placeholder="Paste your Deriv API token here">
+                    <button class="btn-icon" id="toggle-token-vis">👁</button>
+                  </div>
+                  <p class="input-hint">Your token is encrypted with AES-GCM before storage. We never store it in plaintext.</p>
+                </div>
+
+                <div class="form-group">
+                  <label>Deriv App ID <span class="help-icon" title="Your Deriv app ID for WebSocket connection">?</span></label>
+                  <input type="text" id="deriv-appid-input" placeholder="1089 (demo) or your app ID">
+                </div>
+
+                <div class="deriv-actions">
+                  <button class="btn-secondary" id="btn-test-deriv">Test Connection</button>
+                  <button class="btn-primary" id="btn-save-deriv">Save & Connect</button>
+                </div>
+
+                <div class="deriv-test-result hidden" id="deriv-test-result">
+                  <div class="test-status" id="test-status"></div>
+                  <div class="test-details" id="test-details"></div>
+                </div>
+
+                <div class="deriv-info-box">
+                  <h5>How to get your Deriv API Token:</h5>
+                  <ol>
+                    <li>Login to <a href="https://app.deriv.com" target="_blank">Deriv.com</a></li>
+                    <li>Go to <strong>Account Settings</strong> &rarr; <strong>API Token</strong></li>
+                    <li>Create a token with <strong>Trading</strong> and <strong>Read</strong> scopes</li>
+                    <li>Copy and paste it here</li>
+                  </ol>
+                  <p class="security-note">Your platform login and Deriv account are separate. We only use the API token to execute trades on your behalf.</p>
+                </div>
+              </div>
+
+              <div id="settings-profile" class="settings-section hidden">
+                <div class="form-group">
+                  <label>Name</label>
+                  <input type="text" id="settings-name" value="">
+                </div>
+                <div class="form-group">
+                  <label>Email</label>
+                  <input type="email" id="settings-email" value="" disabled>
+                </div>
+                <button class="btn-primary" id="btn-save-profile">Save Profile</button>
+              </div>
+
+              <div id="settings-security" class="settings-section hidden">
+                <div class="form-group">
+                  <label>Current Password</label>
+                  <input type="password" id="curr-password" placeholder="Enter current password">
+                </div>
+                <div class="form-group">
+                  <label>New Password</label>
+                  <input type="password" id="new-password" placeholder="Min 8 characters">
+                </div>
+                <div class="form-group">
+                  <label>Confirm New Password</label>
+                  <input type="password" id="confirm-password" placeholder="Confirm new password">
+                </div>
+                <button class="btn-primary" id="btn-change-password">Change Password</button>
+                <hr style="margin:20px 0;border-color:var(--border)">
+                <button class="btn-secondary" id="btn-logout-all" style="width:100%;background:var(--danger-dim);color:var(--danger);border-color:var(--danger)">Logout All Sessions</button>
+              </div>
+            </div>
+          </div>
+        </div>
+</div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
