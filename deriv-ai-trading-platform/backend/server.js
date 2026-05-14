@@ -89,6 +89,7 @@ const connectDB = async (retries = 5) => {
   }
 };
 
+
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/trades', tradeRoutes);
